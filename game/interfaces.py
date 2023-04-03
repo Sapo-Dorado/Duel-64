@@ -1,26 +1,40 @@
 from abc import ABC, abstractmethod
 from constants import STARTING_MONEY, DISTANCE_FEE
+from shop import NoWeapon, NoMovement, NoDefense
+
+def distance(pos1, pos2):
+  return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
 class ShopObject(ABC):
   @abstractmethod
-  def price(self, distance):
+  def name(self):
+    pass
+
+  @abstractmethod
+  def description(self):
     pass
 
   @abstractmethod
   def onPurchase(self, player):
     pass
 
+  def base_price(self):
+    return 0
+
+  def price(self, distance=0):
+    return self.base_price() + distanceFee(distance)
+
   def distanceFee(self, distance):
-    return distance * DISTANCE_FEE
+    return max((distance-1) * DISTANCE_FEE, 0)
 
-  def buy(self, player, distance):
-    player.spend(self.price(distance))
-    self.onPurchase(player)
+  def buy(self, player, pos):
+    player.spend(self.price(distance(player.getPos(), pos)))
+    self.onPurchase(player, pos)
 
-class BoardObject(ABC):
-  def __init__(self):
-    self.owner = None
-    self.pos = None
+class Building(ShopObject):
+  def __init__(self, owner=None, pos=None):
+    self.owner = owner
+    self.pos = pos
 
   def setOwner(self, owner):
     self.owner = owner
@@ -37,32 +51,34 @@ class BoardObject(ABC):
   def vulnerable(self, player):
     return player != self.owner
 
-class Building(BoardObject, ShopObject):
-  def onPurchase(self, player):
-    self.owner = player
+  def onPurchase(self, player, pos):
+    if pos is None:
+      raise Exception("Building must be placed at a position")
+    self.setPos(pos)
+    self.setOwner(player)
     
   @abstractmethod
   def processTurn(self):
     pass
 
 class WeaponItem(ShopObject):
-  def onPurchase(self, player):
+  def onPurchase(self, player, pos):
     player.setWeapon(self)
 
   @abstractmethod
-  def attackRange(self, pos):
+  def attackRange(self, oldPos, newPos):
     pass
 
 class DefenseItem(ShopObject):
-  def onPurchase(self, player):
+  def onPurchase(self, player, pos):
     player.setDefense(self)
   
   @abstractmethod
-  def onDamage(self, pos):
+  def onDamage(self, player):
     pass
 
 class MovementItem(ShopObject):
-  def onPurchase(self, player):
+  def onPurchase(self, player, pos):
     player.setMovement(self)
 
   @abstractmethod
@@ -71,11 +87,12 @@ class MovementItem(ShopObject):
 
 class Player():
   def __init__(self, pos):
-    self.weapon = None
-    self.defense = None
-    self.movement = None
+    self.weapon = NoWeapon()
+    self.defense = NoDefense()
+    self.movement = NoMovement()
     self.money = STARTING_MONEY
     self.pos = pos
+    self.alive = True
   
   def setWeapon(self, weapon):
     self.weapon = weapon
@@ -96,10 +113,29 @@ class Player():
     if(amount > self.money):
       raise Exception("Insufficient Funds")
     self.money -= amount
+  
+  def sendMoney(self, amount):
+    self.money += amount
 
-  def processMove(self, pos):
-    if(pos not in self.movement.getPossibleSquares(pos)):
+  def getBalance(self):
+    return self.money
+
+  def processMove(self, newPos):
+    if(newPos not in self.getPossibleMoves()):
       raise Exception("Invalid move")
-    self.setPos(pos)
-    return self.weapon.attackRange(pos)
+    oldPos = self.getPos()
+    self.setPos(newPos)
+    return self.weapon.attackRange(oldPos, newPos)
+  
+  def getPossibleMoves(self):
+    return self.movement.getPossibleSquares(self.getPos())
+  
+  def processDamage(self):
+    self.defense.onDamage(self)
+
+  def kill(self):
+    self.alive = False
+  
+  def isAlive(self):
+    return self.alive
     
