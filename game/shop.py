@@ -1,5 +1,5 @@
-from interfaces import WeaponItem, DefenseItem, MovementItem, Building
-from constants import valid_position
+from game.interfaces import WeaponItem, DefenseItem, MovementItem, Building
+from game.constants import valid_position
 
 def getDir(oldPos, newPos):
   oldX,oldY = oldPos
@@ -21,16 +21,6 @@ def cardinalDirections(pos, distance):
 
 def removeInvalid(posList):
   return filter(valid_position, posList)
-
-class NoWeapon(WeaponItem):
-  def name(self):
-    return "No Weapon"
-
-  def description(self):
-    return ""
-
-  def attackRange(self, oldPos, newPos):
-    return [newPos]
 
 class Sword(WeaponItem):
   def name(self):
@@ -75,16 +65,6 @@ class ThrowingStar(WeaponItem):
 
     return removeInvalid(attack)
 
-class NoMovement(MovementItem):
-  def name(self):
-    return "No Movement Item"
-
-  def description(self):
-    return ""
-  
-  def getPossibleSquares(self, pos):
-    return removeInvalid(cardinalDirections(pos, 1))
-  
 class Boots(MovementItem):
   def name(self):
     return "Boots"
@@ -116,19 +96,6 @@ class Wings(MovementItem):
     squares.append((x-1,y+1))
     squares.append((x-1,y-1))
     return removeInvalid(squares)
-
-class NoDefense(DefenseItem):
-  def name(self):
-    return "No Defensive Item"
-  
-  def description(self):
-    return ""
-
-  def base_price(self):
-    return 0
-  
-  def onDamage(self, player):
-    player.kill()
 
 class Mine(Building):
   def name(self):

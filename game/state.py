@@ -1,9 +1,9 @@
-from interfaces import Player, BoardObject
-from constants import P1_START_POS, P2_START_POS, BOARD_SIZE, WINNING_BALANCE, valid_position
-from shop import Mine
+from game.interfaces import Player
+from game.constants import P1_START_POS, P2_START_POS, BOARD_SIZE, WINNING_BALANCE, valid_position
+from game.shop import Mine
 
 class Board:
-  def __init__(self, players):
+  def __init__(self):
     self.boardObjects = [[None for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
 
   def getBoardObject(self, pos):
@@ -15,6 +15,7 @@ class Board:
     if self.boardObjects[x][y] is not None:
       buildings.remove(self.boardObjects[x][y])
     self.boardObjects[x][y] = obj
+    buildings.append(obj)
         
   def attackTile(self, player, pos, buildings):
       if not self.getBoardObject(pos).vulnerable(player):
@@ -34,7 +35,7 @@ class GameState:
     for player in self.players:
       pos = player.getPos()
       mine = Mine(player, pos)
-      self.board.addBoardObject(mine, pos, buildings)
+      self.board.addBoardObject(mine, pos, self.buildings)
 
   def currentPlayer(self):
     return self.players[self.curTurn]
@@ -48,7 +49,7 @@ class GameState:
     return self.checkWin()
   
   def processBuildings(self):
-    for building in buildings:
+    for building in self.buildings:
       attackedTiles = building.processTurn()
       self.attackTiles(attackedTiles)
 
@@ -60,7 +61,7 @@ class GameState:
       otherPlayer = self.otherPlayer()
       if tile == otherPlayer.getPos():
         otherPlayer.processDamage()
-      self.board.attackTile(curPlayer, tile, buildings)
+      self.board.attackTile(curPlayer, tile, self.buildings)
 
 
   def getPossibleMoves(self):
@@ -78,13 +79,13 @@ class GameState:
       self.validatePos(pos)
 
     shopObj.buy(self.currentPlayer(), pos)
-    self.board.addBoardObject(shopObj, pos, buildings)
+    self.board.addBoardObject(shopObj, pos, self.buildings)
     self.passTurn()
   
   def checkWin():
     p1HasBuilding = False
     p2HasBuilding = False
-    for building in buildings:
+    for building in self.buildings:
       if(building.getOwner() == self.players[0]):
         p1HasBuilding = True
       if(building.getOwner() == self.players[1]):

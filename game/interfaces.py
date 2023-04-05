@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-from constants import STARTING_MONEY, DISTANCE_FEE
-from shop import NoWeapon, NoMovement, NoDefense
+from game.constants import STARTING_MONEY, DISTANCE_FEE
 
 def distance(pos1, pos2):
   return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
@@ -84,6 +83,39 @@ class MovementItem(ShopObject):
   @abstractmethod
   def getPossibleSquares(self, pos):
     pass
+
+class NoWeapon(WeaponItem):
+  def name(self):
+    return "No Weapon"
+
+  def description(self):
+    return ""
+
+  def attackRange(self, oldPos, newPos):
+    return [newPos]
+
+class NoMovement(MovementItem):
+  def name(self):
+    return "No Movement Item"
+
+  def description(self):
+    return ""
+  
+  def getPossibleSquares(self, pos):
+    return removeInvalid(cardinalDirections(pos, 1))
+
+class NoDefense(DefenseItem):
+  def name(self):
+    return "No Defensive Item"
+  
+  def description(self):
+    return ""
+
+  def base_price(self):
+    return 0
+  
+  def onDamage(self, player):
+    player.kill()
 
 class Player():
   def __init__(self, pos):
