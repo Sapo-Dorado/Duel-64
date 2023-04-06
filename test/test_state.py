@@ -169,6 +169,18 @@ def test_money_tree_attack():
   assert(buyer.getBalance() == buyerMoney + 11)
   assert(len(game.buildings) == 1)
 
+def test_barrier_blocks():
+  game = GameState()
+  barrier = Barrier()
+  game.processBuy(barrier, (P2_START_POS[0],P2_START_POS[0]-1))
+  assert(game.otherPlayer().getBalance() == STARTING_MONEY + 1 - barrier.base_price())
+  with pytest.raises(Exception, match=INVALID_POS_MSG):
+    game.processMove((P2_START_POS[0],P2_START_POS[0]-1))
+  game.currentPlayer().setWeapon(Sword())
+  game.currentPlayer().setPos((P2_START_POS[0],P2_START_POS[0]-3))
+  game.processMove((P2_START_POS[0],P2_START_POS[0]-2))
+  assert(len(game.buildings) == 3)
+
 
 
 

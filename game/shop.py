@@ -198,4 +198,25 @@ class MoneyTree(Building):
       return removeInvalid(targets)
     return []
 
+class Barrier(Building):
+  def name(self):
+    return constants.BARRIER
+  
+  def description(self):
+    return constants.BARRIER_DESC
+  
+  def base_price(self):
+    return 3
+  
+  def distanceFee(self, distance):
+    return 0
+
+  def vulnerable(self, player):
+    return False
+  
+  def blocksMovement(self):
+    return True
+  
+  def processTurn(self):
+    return []
   

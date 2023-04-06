@@ -50,6 +50,9 @@ class Building(ShopObject):
   
   def vulnerable(self, player):
     return player != self.owner
+  
+  def blocksMovement(self):
+    return False
 
   def onPurchase(self, player, pos):
     if pos is None:

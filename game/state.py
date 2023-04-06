@@ -17,6 +17,10 @@ class Board:
       buildings.remove(self.boardObjects[x][y])
     self.boardObjects[x][y] = obj
     buildings.append(obj)
+  
+  def blocksMovement(self, pos):
+    obj = self.getBoardObject(pos)
+    return obj is not None and obj.blocksMovement()
         
   def attackTile(self, player, pos, buildings):
     obj = self.getBoardObject(pos)
@@ -125,7 +129,7 @@ class GameState:
     return self.winner
   
   def validatePos(self, pos):
-    if not validPosition(pos):
+    if not validPosition(pos) or self.board.blocksMovement(pos):
       raise Exception(constants.INVALID_POS_MSG)
 
   
