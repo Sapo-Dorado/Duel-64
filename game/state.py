@@ -76,9 +76,13 @@ class GameState:
     return self.shop.extractItem(idx)
 
   def getPossibleMoves(self):
+    if self.winner is not None:
+      return []
     return self.currentPlayer().getPossibleMoves()
   
   def processMove(self, pos):
+    if self.winner is not None:
+      return
     self.validatePos(pos)
     curPlayer = self.currentPlayer()
     attackedTiles = curPlayer.processMove(pos)
@@ -86,6 +90,8 @@ class GameState:
     self.passTurn()
   
   def processBuy(self, shopObj, pos=None):
+    if self.winner is not None:
+      return
     currentPlayer = self.currentPlayer()
     if pos is not None:
       self.validatePos(pos)
@@ -131,5 +137,6 @@ class GameState:
   def validatePos(self, pos):
     if not validPosition(pos) or self.board.blocksMovement(pos):
       raise Exception(constants.INVALID_POS_MSG)
+  
 
   
