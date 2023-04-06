@@ -1,10 +1,11 @@
 from game.interfaces import Player
-from game.constants import P1_START_POS, P2_START_POS, BOARD_SIZE, WINNING_BALANCE, valid_position
+from game.constants import validPosition
+import game.constants as constants
 from game.shop import Mine
 
 class Board:
   def __init__(self):
-    self.boardObjects = [[None for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
+    self.boardObjects = [[None for _ in range(constants.BOARD_SIZE)] for _ in range(constants.BOARD_SIZE)]
 
   def getBoardObject(self, pos):
     x,y = pos
@@ -18,15 +19,15 @@ class Board:
     buildings.append(obj)
         
   def attackTile(self, player, pos, buildings):
-      if not self.getBoardObject(pos).vulnerable(player):
-        x,y = pos
-        if self.boardObjects[x][y] is not None:
-          buildings.remove(self.boardObjects[x][y])
-        self.boardObjects[x][y] = None
+    obj = self.getBoardObject(pos)
+    if obj is not None and obj.vulnerable(player):
+      x,y = pos
+      buildings.remove(obj)
+      self.boardObjects[x][y] = None
 
 class GameState:
   def __init__(self):
-    self.players = (Player(P1_START_POS), Player(P2_START_POS))
+    self.players = (Player(constants.P1_START_POS), Player(constants.P2_START_POS))
     self.board = Board()
     self.buildings = []
     self.curTurn = 0
@@ -61,7 +62,7 @@ class GameState:
       otherPlayer = self.otherPlayer()
       if tile == otherPlayer.getPos():
         otherPlayer.processDamage()
-      self.board.attackTile(curPlayer, tile, self.buildings)
+      self.board.attackTile(self.currentPlayer(), tile, self.buildings)
 
 
   def getPossibleMoves(self):
@@ -75,14 +76,16 @@ class GameState:
     self.passTurn()
   
   def processBuy(self, shopObj, pos=None):
+    currentPlayer = self.currentPlayer()
     if pos is not None:
       self.validatePos(pos)
-
-    shopObj.buy(self.currentPlayer(), pos)
-    self.board.addBoardObject(shopObj, pos, self.buildings)
+      shopObj.buy(currentPlayer, pos)
+      self.board.addBoardObject(shopObj, pos, self.buildings)
+    else:
+      shopObj.buy(currentPlayer, currentPlayer.getPos())
     self.passTurn()
   
-  def checkWin():
+  def checkWin(self):
     p1HasBuilding = False
     p2HasBuilding = False
     for building in self.buildings:
@@ -93,26 +96,30 @@ class GameState:
 
     p1Win = False
     p2Win = False
-    if not self.players[1].isAlive() or not p2HasBuilding or self.players[0].getBalance >= WINNING_BALANCE:
+    if (not self.players[1].isAlive() or
+        not p2HasBuilding or
+        self.players[0].getBalance() >= constants.WINNING_BALANCE):
       p1Win = True
-    if not self.players[0].isAlive() or not p1HasBuilding or self.players[1].getBalance >= WINNING_BALANCE:
+    if (not self.players[0].isAlive() or
+        not p1HasBuilding or
+        self.players[1].getBalance() >= constants.WINNING_BALANCE):
       p2Win = True
     if p1Win and p2Win:
-      self.winner = "Tie"
+      self.winner = constants.TIE_MSG
       return True
     elif p1Win:
-      self.winner = "Player 1"
+      self.winner = constants.P1_WIN_MSG
       return True
     elif p2Win:
-      self.winner = "Player 2"
+      self.winner = constants.P2_WIN_MSG
       return True
     return False
   
-  def getWinner():
+  def getWinner(self):
     return self.winner
   
-  def validatePos(pos):
-    if not valid_position(pos):
-      raise Exception("Invalid position")
+  def validatePos(self, pos):
+    if not validPosition(pos):
+      raise Exception(constants.INVALID_POS_MSG)
 
   

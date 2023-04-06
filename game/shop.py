@@ -1,52 +1,42 @@
 from game.interfaces import WeaponItem, DefenseItem, MovementItem, Building
-from game.constants import valid_position
+from game.constants import removeInvalid, cardinalDirections
+import game.constants as constants
 
 def getDir(oldPos, newPos):
   oldX,oldY = oldPos
   newX,newY = newPos
-  xDir = 0 if newX == oldX else (newX - oldX)/abs(newX - oldX)
-  yDir = 0 if newY == oldY else (newY - oldY)/abs(newY - oldY)
+  xDir = 0 if newX == oldX else (newX - oldX)//abs(newX - oldX)
+  yDir = 0 if newY == oldY else (newY - oldY)//abs(newY - oldY)
   return (xDir, yDir)
 
-def cardinalDirections(pos, distance):
-  x,y = pos
-  result = []
-  for i in range(1,distance+1):
-    result.append((x+i,y))
-    result.append((x-i,y))
-    result.append((x,y+i))
-    result.append((x,y-i))
-
-  return result
-
-def removeInvalid(posList):
-  return filter(valid_position, posList)
 
 class Sword(WeaponItem):
   def name(self):
-    return "Sword"
+    return constants.SWORD
   
   def description(self):
-    return "Increases attack range to include one additional block in the direction of movement."
+    return constants.SWORD_DESC
   
   def base_price(self):
     return 5
   
   def attackRange(self, oldPos, newPos):
+    newX, newY = newPos
     xDir,yDir = getDir(oldPos, newPos)
     return removeInvalid([newPos, (newX + xDir, newY + yDir)])
 
 class ThrowingStar(WeaponItem):
   def name(self):
-    return "Throwing star"
+    return constants.THROWING_STAR
   
   def description(self):
-    return "Attacks in a Y shape pointing in the direction of movement. This adds two additional squares of range diagonally in front of you, and two in a straight line behind you."
+    return constants.THROWING_STAR_DESC
   
   def base_price(self):
-    return 7
+    return 9
   
   def attackRange(self, oldPos, newPos):
+    newX,newY = newPos
     xDir,yDir = getDir(oldPos, newPos)
     attack =[
       newPos,
@@ -67,10 +57,10 @@ class ThrowingStar(WeaponItem):
 
 class Boots(MovementItem):
   def name(self):
-    return "Boots"
+    return constants.BOOTS 
   
   def description(self):
-    return "Increases potential movement range by one square in each cardinal direction."
+    return constants.BOOTS_DESC
   
   def base_price(self):
     return 5
@@ -80,10 +70,10 @@ class Boots(MovementItem):
 
 class Wings(MovementItem):
   def name(self):
-    return "Wings"
+    return constants.WINGS
   
   def description(self):
-    return "Increases potential movement range by one square in each cardinal direction and one square in each diagonal direction."
+    return constants.WINGS_DESC
   
   def base_price(self):
     return 7
@@ -99,13 +89,14 @@ class Wings(MovementItem):
 
 class Mine(Building):
   def name(self):
-    return "Mine"
+    return constants.MINE
   
   def description(self):
-    return "Produces one gold per turn"
+    return constants.MINE_DESC
   
   def base_price(self):
     return 10
   
   def processTurn(self):
     self.getOwner().sendMoney(1)
+    return []

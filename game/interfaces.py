@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from game.constants import STARTING_MONEY, DISTANCE_FEE
+from game.constants import removeInvalid, cardinalDirections
+import game.constants as constants
 
 def distance(pos1, pos2):
   return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
@@ -20,11 +21,11 @@ class ShopObject(ABC):
   def base_price(self):
     return 0
 
-  def price(self, distance=0):
-    return self.base_price() + distanceFee(distance)
+  def price(self, distance):
+    return self.base_price() + self.distanceFee(distance)
 
   def distanceFee(self, distance):
-    return max((distance-1) * DISTANCE_FEE, 0)
+    return max((distance-1) * constants.DISTANCE_FEE, 0)
 
   def buy(self, player, pos):
     player.spend(self.price(distance(player.getPos(), pos)))
@@ -52,10 +53,11 @@ class Building(ShopObject):
 
   def onPurchase(self, player, pos):
     if pos is None:
-      raise Exception("Building must be placed at a position")
+      raise Exception(constants.BUILDING_NEEDS_POS_MSG)
     self.setPos(pos)
     self.setOwner(player)
     
+  #Should return the tiles being attacked, if any
   @abstractmethod
   def processTurn(self):
     pass
@@ -86,30 +88,30 @@ class MovementItem(ShopObject):
 
 class NoWeapon(WeaponItem):
   def name(self):
-    return "No Weapon"
+    return constants.NO_WEAPON
 
   def description(self):
-    return ""
+    return constants.NO_WEAPON_DESC
 
   def attackRange(self, oldPos, newPos):
     return [newPos]
 
 class NoMovement(MovementItem):
   def name(self):
-    return "No Movement Item"
+    return constants.NO_MOVEMENT
 
   def description(self):
-    return ""
+    return constants.NO_MOVEMENT_DESC
   
   def getPossibleSquares(self, pos):
     return removeInvalid(cardinalDirections(pos, 1))
 
 class NoDefense(DefenseItem):
   def name(self):
-    return "No Defensive Item"
+    return constants.NO_DEFENSE
   
   def description(self):
-    return ""
+    return constants.NO_DEFENSE_DESC
 
   def base_price(self):
     return 0
@@ -122,18 +124,27 @@ class Player():
     self.weapon = NoWeapon()
     self.defense = NoDefense()
     self.movement = NoMovement()
-    self.money = STARTING_MONEY
+    self.money = constants.STARTING_MONEY
     self.pos = pos
     self.alive = True
   
   def setWeapon(self, weapon):
     self.weapon = weapon
+
+  def getWeapon(self):
+    return self.weapon
   
   def setDefense(self, defense):
     self.defense = defense
   
+  def getDefense(self):
+    return self.defense
+
   def setMovement(self, movement):
     self.movement = movement
+  
+  def getMovement(self):
+    return self.movement
   
   def setPos(self, pos):
     self.pos = pos
@@ -143,7 +154,7 @@ class Player():
   
   def spend(self, amount):
     if(amount > self.money):
-      raise Exception("Insufficient Funds")
+      raise Exception(constants.NOT_ENOUGH_MONEY_MSG)
     self.money -= amount
   
   def sendMoney(self, amount):
@@ -154,7 +165,7 @@ class Player():
 
   def processMove(self, newPos):
     if(newPos not in self.getPossibleMoves()):
-      raise Exception("Invalid move")
+      raise Exception(constants.INVALID_MOVE_MSG)
     oldPos = self.getPos()
     self.setPos(newPos)
     return self.weapon.attackRange(oldPos, newPos)
