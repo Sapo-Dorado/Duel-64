@@ -125,6 +125,7 @@ class Player():
     self.defense = NoDefense()
     self.movement = NoMovement()
     self.money = constants.STARTING_MONEY
+    self.startingPosition = pos
     self.pos = pos
     self.alive = True
   
@@ -151,6 +152,9 @@ class Player():
 
   def getPos(self):
     return self.pos
+  
+  def getStartingPosition(self):
+    return self.startingPosition
   
   def spend(self, amount):
     if(amount > self.money):

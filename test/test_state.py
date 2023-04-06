@@ -62,7 +62,7 @@ def test_getPossibleMoves():
 
 def test_attack_wins_game():
   game = GameState()
-  game.players[1].setPos((0,1))
+  game.otherPlayer().setPos((0,1))
   game.processMove((0,1))
   assert(not game.players[1].isAlive())
   assert(game.getWinner() == constants.P1_WIN_MSG)
@@ -70,7 +70,7 @@ def test_attack_wins_game():
 
 def test_attack_destroys_building():
   game = GameState()
-  game.players[1].setPos((0,1))
+  game.otherPlayer().setPos((0,1))
   game.processMove((1,0))
   game.processMove((0,0))
   assert(len(game.buildings) == 1)
@@ -96,6 +96,31 @@ def test_movement_increases_possible_moves():
   moves = game.getPossibleMoves()
   assert(len(moves) == 8)
 
+def test_shield():
+  game = GameState()
+  game.otherPlayer().setPos((0,1))
+  shield = Shield()
+  shield.buy(game.otherPlayer(), game.otherPlayer().getPos())
+  boots = Boots()
+  boots.buy(game.otherPlayer(), game.otherPlayer().getPos())
+  game.processMove((0,1))
+  assert(game.currentPlayer().isAlive())
+  assert(game.currentPlayer().getPos() == (P2_START_POS))
+  assert(game.currentPlayer().getMovement().name() == NO_MOVEMENT)
+
+def test_upgraded_shield():
+  game = GameState()
+  game.otherPlayer().money = 100
+  game.otherPlayer().setPos((0,1))
+  shield = UpgradedShield()
+  shield.buy(game.otherPlayer(), game.otherPlayer().getPos())
+  boots = Boots()
+  boots.buy(game.otherPlayer(), game.otherPlayer().getPos())
+  game.processMove((0,1))
+  assert(game.currentPlayer().isAlive())
+  assert(game.currentPlayer().getPos() == (P2_START_POS))
+  assert(game.currentPlayer().getMovement().name() == BOOTS)
+
 def test_invalid_inputs_revert():
   game = GameState()
   game.currentPlayer().money = 0
@@ -107,8 +132,9 @@ def test_invalid_inputs_revert():
 
 def test_shop():
   game = GameState()
-  assert(len(game.getShopItems()) == 5)
+  assert(len(game.getShopItems()) == 7)
   item1 = game.extractItem(3)
   item2 = game.extractItem(3)
   assert(item1.name() == item2.name())
   assert(item1 is not item2)
+

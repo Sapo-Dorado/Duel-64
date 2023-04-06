@@ -1,11 +1,11 @@
-from game.interfaces import WeaponItem, DefenseItem, MovementItem, Building
+from game.interfaces import WeaponItem, DefenseItem, MovementItem, Building, NoDefense, NoMovement, NoWeapon
 from game.constants import removeInvalid, cardinalDirections
 import game.constants as constants
 
 class BasicShop:
   def __init__(self):
-    self.items = [Sword(), ThrowingStar(), Boots(), Wings(), Mine()]
-    self.constructors = [Sword, ThrowingStar, Boots, Wings, Mine]
+    self.items = [Sword(), ThrowingStar(), Boots(), Wings(), Shield(), UpgradedShield(), Mine()]
+    self.constructors = [Sword, ThrowingStar, Boots, Wings, Shield, UpgradedShield, Mine]
   
   def extractItem(self, idx):
     item = self.items[idx]
@@ -113,3 +113,33 @@ class Mine(Building):
   def processTurn(self):
     self.getOwner().sendMoney(1)
     return []
+
+class Shield(DefenseItem):
+  def name(self):
+    return constants.SHIELD
+  
+  def description(self):
+    return constants.SHIELD_DESC
+  
+  def base_price(self):
+    return 5
+
+  def onDamage(self, player):
+    player.setPos(player.getStartingPosition())
+    player.setDefense(NoDefense())
+    player.setWeapon(NoWeapon())
+    player.setMovement(NoMovement())
+
+class UpgradedShield(DefenseItem):
+  def name(self):
+    return constants.UPGRADED_SHIELD
+  
+  def description(self):
+    return constants.UPGRADED_SHIELD_DESC
+  
+  def base_price(self):
+    return 10
+
+  def onDamage(self, player):
+    player.setPos(player.getStartingPosition())
+    player.setDefense(NoDefense())
