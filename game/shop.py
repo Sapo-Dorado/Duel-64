@@ -2,6 +2,19 @@ from game.interfaces import WeaponItem, DefenseItem, MovementItem, Building
 from game.constants import removeInvalid, cardinalDirections
 import game.constants as constants
 
+class BasicShop:
+  def __init__(self):
+    self.items = [Sword(), ThrowingStar(), Boots(), Wings(), Mine()]
+    self.constructors = [Sword, ThrowingStar, Boots, Wings, Mine]
+  
+  def extractItem(self, idx):
+    item = self.items[idx]
+    self.items[idx] = self.constructors[idx]()
+    return item
+  
+  def getItems(self):
+    return self.items
+
 def getDir(oldPos, newPos):
   oldX,oldY = oldPos
   newX,newY = newPos

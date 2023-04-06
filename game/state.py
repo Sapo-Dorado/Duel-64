@@ -1,7 +1,7 @@
 from game.interfaces import Player
 from game.constants import validPosition
 import game.constants as constants
-from game.shop import Mine
+from game.shop import Mine, BasicShop
 
 class Board:
   def __init__(self):
@@ -30,6 +30,7 @@ class GameState:
     self.players = (Player(constants.P1_START_POS), Player(constants.P2_START_POS))
     self.board = Board()
     self.buildings = []
+    self.shop = BasicShop()
     self.curTurn = 0
     self.winner = None
 
@@ -64,6 +65,11 @@ class GameState:
         otherPlayer.processDamage()
       self.board.attackTile(self.currentPlayer(), tile, self.buildings)
 
+  def getShopItems(self):
+    return self.shop.getItems()
+  
+  def extractItem(self, idx):
+    return self.shop.extractItem(idx)
 
   def getPossibleMoves(self):
     return self.currentPlayer().getPossibleMoves()

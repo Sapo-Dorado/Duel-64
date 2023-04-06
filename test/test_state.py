@@ -104,3 +104,11 @@ def test_invalid_inputs_revert():
     boots.buy(game.currentPlayer(), game.currentPlayer().getPos())
   with pytest.raises(Exception, match=INVALID_MOVE_MSG):
     game.processMove((5,5))
+
+def test_shop():
+  game = GameState()
+  assert(len(game.getShopItems()) == 5)
+  item1 = game.extractItem(3)
+  item2 = game.extractItem(3)
+  assert(item1.name() == item2.name())
+  assert(item1 is not item2)
