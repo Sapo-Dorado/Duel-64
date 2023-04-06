@@ -132,7 +132,7 @@ def test_invalid_inputs_revert():
 
 def test_shop():
   game = GameState()
-  assert(len(game.getShopItems()) == 8)
+  assert(len(game.getShopItems()) == 9)
   item1 = game.extractItem(3)
   item2 = game.extractItem(3)
   assert(item1.name() == item2.name())
@@ -148,3 +148,27 @@ def test_spike_attack():
   game.passTurn()
   assert(not game.otherPlayer().isAlive())
   assert(game.getWinner() == P1_WIN_MSG)
+
+def test_money_tree_attack():
+  game = GameState()
+  tree = MoneyTree()
+  buyer = game.currentPlayer()
+  buyer.sendMoney(50)
+  other = game.otherPlayer()
+  game.processBuy(tree, (P2_START_POS[0],P2_START_POS[0]-1))
+  game.passTurn()
+  game.passTurn()
+  game.passTurn()
+  assert(other.isAlive())
+  assert(game.getWinner() == None)
+  buyerMoney = buyer.getBalance()
+  assert(len(game.buildings) == 3)
+  game.passTurn()
+  assert(not other.isAlive())
+  assert(game.getWinner() == P1_WIN_MSG)
+  assert(buyer.getBalance() == buyerMoney + 11)
+  assert(len(game.buildings) == 1)
+
+
+
+

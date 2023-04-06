@@ -56,4 +56,5 @@ UPGRADED_SHIELD_DESC = "Saves you from one killing blow. Sends you back to your 
 SPIKE_TRAP = "Spike Trap"
 SPIKE_TRAP_DESC = "Attacks enemies and enemy buildings within one square in all four cardinal directions. Doesn't attack the turn it is played"
 MONEY_TREE = "Money Tree"
+MONEY_TREE_DESC = "After 5 turns, produce 10 gold and self destruct. Goes out with a bang!"
 BARRIER = "Barrier"

@@ -4,8 +4,8 @@ import game.constants as constants
 
 class BasicShop:
   def __init__(self):
-    self.items = [Sword(), ThrowingStar(), Boots(), Wings(), Shield(), UpgradedShield(), Mine(), SpikeTrap()]
-    self.constructors = [Sword, ThrowingStar, Boots, Wings, Shield, UpgradedShield, Mine, SpikeTrap]
+    self.items = [Sword(), ThrowingStar(), Boots(), Wings(), Shield(), UpgradedShield(), Mine(), SpikeTrap(), MoneyTree()]
+    self.constructors = [Sword, ThrowingStar, Boots, Wings, Shield, UpgradedShield, Mine, SpikeTrap, MoneyTree]
   
   def extractItem(self, idx):
     item = self.items[idx]
@@ -164,3 +164,38 @@ class SpikeTrap(Building):
     else:
       self.activated = True
       return []
+
+class MoneyTree(Building):
+  def name(self):
+    return constants.MONEY_TREE
+  
+  def description(self):
+    return constants.MONEY_TREE_DESC
+  
+  def base_price(self):
+    return 5
+
+  def onPurchase(self, player, pos):
+    super().onPurchase(player, pos)
+    self.turnCount = 0
+  
+  def vulnerable(self, player):
+    if(self.turnCount < 5):
+      return super().vulnerable(player)
+    return True
+  
+  def processTurn(self):
+    self.turnCount += 1
+    if(self.turnCount >= 5):
+      self.getOwner().sendMoney(10)
+      targets = cardinalDirections(self.getPos(), 1)
+      x,y = self.getPos()
+      targets.append((x,y))
+      targets.append((x+1,y+1))
+      targets.append((x+1,y-1))
+      targets.append((x-1,y+1))
+      targets.append((x-1,y-1))
+      return removeInvalid(targets)
+    return []
+
+  

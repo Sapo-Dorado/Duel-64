@@ -1,4 +1,5 @@
 from game.shop import *
+from game.interfaces import Player
 
 def test_sword():
   sword = Sword()
@@ -107,3 +108,27 @@ def test_spike_trap():
   assert((0,1) in range2)
   assert((1,0) in range2)
 
+def test_money_tree():
+  tree = MoneyTree()
+  tree.turnCount = 5
+  tree.setOwner(Player((0,0)))
+  tree.setPos((4,4))
+  range1 = tree.processTurn()
+  assert(len(range1) == 9)
+  assert((4,4) in range1)
+  assert((5,5) in range1)
+  assert((3,3) in range1)
+  assert((3,5) in range1)
+  assert((5,3) in range1)
+  assert((5,4) in range1)
+  assert((4,5) in range1)
+  assert((4,3) in range1)
+  assert((3,4) in range1)
+
+  tree.setPos((0,0))
+  range2 = tree.processTurn()
+  assert(len(range2) == 4)
+  assert((0,0) in range2)
+  assert((0,1) in range2)
+  assert((1,1) in range2)
+  assert((1,0) in range2)
