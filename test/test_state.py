@@ -132,9 +132,19 @@ def test_invalid_inputs_revert():
 
 def test_shop():
   game = GameState()
-  assert(len(game.getShopItems()) == 7)
+  assert(len(game.getShopItems()) == 8)
   item1 = game.extractItem(3)
   item2 = game.extractItem(3)
   assert(item1.name() == item2.name())
   assert(item1 is not item2)
 
+def test_spike_attack():
+  game = GameState()
+  game.currentPlayer().sendMoney(50)
+  trap = SpikeTrap()
+  game.processBuy(trap, (P2_START_POS[0],P2_START_POS[0]-1))
+  assert(game.currentPlayer().isAlive())
+  assert(game.getWinner() == None)
+  game.passTurn()
+  assert(not game.otherPlayer().isAlive())
+  assert(game.getWinner() == P1_WIN_MSG)

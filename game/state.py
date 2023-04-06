@@ -53,17 +53,17 @@ class GameState:
   def processBuildings(self):
     for building in self.buildings:
       attackedTiles = building.processTurn()
-      self.attackTiles(attackedTiles)
+      self.attackTiles(attackedTiles, building.getOwner())
 
   def getBoard(self):
     return self.board
   
-  def attackTiles(self, tiles):
+  def attackTiles(self, tiles, player):
+    otherPlayer = self.players[1] if player is self.players[0] else self.players[0]
     for tile in tiles:
-      otherPlayer = self.otherPlayer()
       if tile == otherPlayer.getPos():
         otherPlayer.processDamage()
-      self.board.attackTile(self.currentPlayer(), tile, self.buildings)
+      self.board.attackTile(player, tile, self.buildings)
 
   def getShopItems(self):
     return self.shop.getItems()
@@ -78,7 +78,7 @@ class GameState:
     self.validatePos(pos)
     curPlayer = self.currentPlayer()
     attackedTiles = curPlayer.processMove(pos)
-    self.attackTiles(attackedTiles)
+    self.attackTiles(attackedTiles, curPlayer)
     self.passTurn()
   
   def processBuy(self, shopObj, pos=None):

@@ -90,3 +90,20 @@ def test_wings():
   assert((1,0) in range2)
   assert((2,0) in range2)
 
+def test_spike_trap():
+  spike = SpikeTrap()
+  spike.activated = True
+  spike.setPos((4,4))
+  range1 = spike.processTurn()
+  assert(len(range1) == 4)
+  assert((5,4) in range1)
+  assert((4,5) in range1)
+  assert((4,3) in range1)
+  assert((3,4) in range1)
+
+  spike.setPos((0,0))
+  range2 = spike.processTurn()
+  assert(len(range2) == 2)
+  assert((0,1) in range2)
+  assert((1,0) in range2)
+

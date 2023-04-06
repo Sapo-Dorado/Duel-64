@@ -4,8 +4,8 @@ import game.constants as constants
 
 class BasicShop:
   def __init__(self):
-    self.items = [Sword(), ThrowingStar(), Boots(), Wings(), Shield(), UpgradedShield(), Mine()]
-    self.constructors = [Sword, ThrowingStar, Boots, Wings, Shield, UpgradedShield, Mine]
+    self.items = [Sword(), ThrowingStar(), Boots(), Wings(), Shield(), UpgradedShield(), Mine(), SpikeTrap()]
+    self.constructors = [Sword, ThrowingStar, Boots, Wings, Shield, UpgradedShield, Mine, SpikeTrap]
   
   def extractItem(self, idx):
     item = self.items[idx]
@@ -100,20 +100,6 @@ class Wings(MovementItem):
     squares.append((x-1,y-1))
     return removeInvalid(squares)
 
-class Mine(Building):
-  def name(self):
-    return constants.MINE
-  
-  def description(self):
-    return constants.MINE_DESC
-  
-  def base_price(self):
-    return 10
-  
-  def processTurn(self):
-    self.getOwner().sendMoney(1)
-    return []
-
 class Shield(DefenseItem):
   def name(self):
     return constants.SHIELD
@@ -143,3 +129,38 @@ class UpgradedShield(DefenseItem):
   def onDamage(self, player):
     player.setPos(player.getStartingPosition())
     player.setDefense(NoDefense())
+
+class Mine(Building):
+  def name(self):
+    return constants.MINE
+  
+  def description(self):
+    return constants.MINE_DESC
+  
+  def base_price(self):
+    return 10
+  
+  def processTurn(self):
+    self.getOwner().sendMoney(1)
+    return []
+
+class SpikeTrap(Building):
+  def name(self):
+    return constants.SPIKE_TRAP
+  
+  def description(self):
+    return constants.SPIKE_TRAP_DESC
+  
+  def base_price(self):
+    return 5
+  
+  def onPurchase(self, player, pos):
+    super().onPurchase(player, pos)
+    self.activated = False
+
+  def processTurn(self):
+    if(self.activated):
+      return removeInvalid(cardinalDirections(self.getPos(), 1))
+    else:
+      self.activated = True
+      return []
