@@ -18,7 +18,8 @@ class GameBoardUI:
     self.game = GameState()
     self.updateCallbacks = []
     self.eventCallbacks = []
-    self.drawGameState()
+    self.start()
+
 
   def clearCallbacks(self):
     self.updateCallbacks = []
@@ -71,19 +72,31 @@ class GameBoardUI:
     self.updateCallbacks.append(updateButton)
     self.eventCallbacks.append(onEvent)
 
-
+  def printWinner(self):
+    font = pygame.font.SysFont('Corbel', 120)
+    text = font.render(self.game.getWinner(), True, "black", "beige")
+    textRect = text.get_rect()
+    textRect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
+    self.screen.blit(text, textRect)
 
   def drawGameState(self):
     self.screen.fill("beige")
-    self.drawGrid()
-    for building in self.game.buildings:
-      self.drawBuilding(building)
-    for i,player in enumerate(self.game.players):
-      self.drawPlayer(player, i)
-    for pos in self.game.getPossibleMoves():
-      self.drawMoveButton(pos)
+    if(self.game.getWinner() is not None):
+      self.printWinner()
+    else:
+      self.drawGrid()
+      for building in self.game.buildings:
+        self.drawBuilding(building)
+      for i,player in enumerate(self.game.players):
+        self.drawPlayer(player, i)
+      for pos in self.game.getPossibleMoves():
+        self.drawMoveButton(pos)
     pygame.display.flip()
     
+  def start(self):
+    pygame.display.set_caption(GAME_TITLE)
+    self.drawGameState()
+
   def update(self):
     for event in pygame.event.get():
       if event.type == pygame.QUIT:

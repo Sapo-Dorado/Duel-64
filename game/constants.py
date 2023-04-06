@@ -26,9 +26,9 @@ def removeInvalid(posList):
   return list(filter(validPosition, posList))
 
 INVALID_POS_MSG = "Invalid Position"
-P1_WIN_MSG = "Player 1"
-P2_WIN_MSG = "Player 2"
-TIE_MSG = "Tie"
+P1_WIN_MSG = "Player 1 Wins!"
+P2_WIN_MSG = "Player 2 Wins!"
+TIE_MSG = "It's a tie!"
 BUILDING_NEEDS_POS_MSG = "Building must be placed at a position"
 NOT_ENOUGH_MONEY_MSG = "Insufficient funds"
 INVALID_MOVE_MSG = "Invalid Move"
