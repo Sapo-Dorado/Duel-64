@@ -56,7 +56,7 @@ class GameState:
   
   def processBuildings(self):
     for building in self.buildings:
-      attackedTiles = building.processTurn()
+      attackedTiles = building.processTurn(self)
       self.attackTiles(attackedTiles, building.getOwner())
 
   def getBoard(self):

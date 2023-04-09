@@ -62,7 +62,7 @@ class Building(ShopObject):
     
   #Should return the tiles being attacked, if any
   @abstractmethod
-  def processTurn(self):
+  def processTurn(self, gameState):
     pass
 
 class WeaponItem(ShopObject):

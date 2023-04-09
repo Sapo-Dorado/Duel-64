@@ -2,12 +2,13 @@ import pygame
 from UI.constants import *
 from game.constants import BOARD_SIZE
 from game.state import GameState
+import sys
 
 def initializeGrid():
   grid = []
-  for i,x in enumerate(range(0,WINDOW_WIDTH,BLOCK_SIZE)):
+  for i,x in enumerate(range(SIDEBAR_SIZE,WINDOW_WIDTH-SIDEBAR_SIZE,BLOCK_SIZE)):
     grid.append([])
-    for y in range(0,WINDOW_HEIGHT,BLOCK_SIZE):
+    for y in range(SIDEBAR_SIZE,WINDOW_HEIGHT-SIDEBAR_SIZE,BLOCK_SIZE):
       grid[i].append((x,y))
   return grid
 
@@ -25,6 +26,27 @@ class GameBoardUI:
     self.updateCallbacks = []
     self.eventCallbacks = []
 
+  def writeText(self, coords, text, size):
+    font = pygame.font.SysFont('Corbel', size)
+    text = font.render(text, True, "black", "beige")
+    textRect = text.get_rect()
+    textRect.center = coords
+    self.screen.blit(text, textRect)
+
+  def drawImage(self, coords, name):
+    image = pygame.image.load(name)
+    default_image_size = (BLOCK_SIZE * 1.25,BLOCK_SIZE * 1.25)
+    image_90 = pygame.transform.scale(image,default_image_size)
+    self.screen.blit(image_90, coords)
+
+  def drawGridImage(self, pos ,name):
+    x,y = pos
+    image = pygame.image.load(name)
+    default_image_size = (BLOCK_SIZE-2,BLOCK_SIZE-2)
+    image_90 = pygame.transform.scale(image,default_image_size)
+    gridX,gridY = self.grid[x][y]
+    self.screen.blit(image_90,(gridX+1,gridY+1))
+
   def drawGrid(self):
     for row in self.grid:
       for x,y in row:
@@ -41,24 +63,23 @@ class GameBoardUI:
         pos[1] >= center[1] - maxDistance and pos[1] <= center[1] + maxDistance)
 
   def drawPlayer(self, player, playerNum):
-    colors = ["grey", (100,100,100)]
-    pygame.draw.circle(self.screen, colors[playerNum], self.gridCenter(player.getPos()), PLAYER_RADIUS)
+    players = [PLAYER1_IMG, PLAYER2_IMG]
+    self.drawGridImage(player.getPos(), players[playerNum])
   
   def drawBuilding(self, building):
-    xPos,yPos = building.getPos()
-    x,y = self.grid[xPos][yPos]
-    rect = pygame.Rect(x, y, BLOCK_SIZE, BLOCK_SIZE)
-    pygame.draw.rect(self.screen, "red", rect)
+    self.drawGridImage(building.getPos(), GAME_OBJECTS[building.name()])
   
   def drawMoveButton(self, pos):
     center = self.gridCenter(pos)
 
     def updateButton():
       mouse = pygame.mouse.get_pos()
+      rect = None
       if self.withinBlock(center, mouse):
-        pygame.draw.circle(self.screen, (240,230,140), center, PLAYER_RADIUS // 2)
+        rect = pygame.draw.circle(self.screen, (240,230,140), center, PLAYER_RADIUS // 2)
       else:
-        pygame.draw.circle(self.screen, "yellow", center, PLAYER_RADIUS // 2)
+        rect = pygame.draw.circle(self.screen, "yellow", center, PLAYER_RADIUS // 2)
+      pygame.display.update(rect)
 
     def onEvent(event):
       mouse = pygame.mouse.get_pos()
@@ -72,12 +93,36 @@ class GameBoardUI:
     self.updateCallbacks.append(updateButton)
     self.eventCallbacks.append(onEvent)
 
+  def drawShop(self):
+    shop = self.game.shop
+    items = shop.getItems()
+    for i,item in enumerate(items):
+      x = 10 + ((WINDOW_WIDTH - 20) * i) // len(items)
+      self.drawImage((x, SIDEBAR_SIZE // 4), GAME_OBJECTS[items[i].name()])
+    self.writeText((WINDOW_WIDTH // 2, SIDEBAR_SIZE // 8), "Shop", 30)
+
+  def drawPlayerInfo(self):
+    p1Info = getPlayerItemInfo(self.game.players[0])
+    p2Info = getPlayerItemInfo(self.game.players[1])
+    sidebarLength = WINDOW_HEIGHT - (2 * SIDEBAR_SIZE)
+
+    for i,info in enumerate(p1Info):
+      loc = (SIDEBAR_SIZE // 2, SIDEBAR_SIZE + 100 + i * (100))
+      self.writeText(loc, info[0], 24)
+      self.writeText((loc[0], loc[1] + 24), info[1], 24)
+
+    for i,info in enumerate(p2Info):
+      sidebarLength = WINDOW_HEIGHT - (2 * SIDEBAR_SIZE)
+      loc = (WINDOW_WIDTH - (SIDEBAR_SIZE // 2), SIDEBAR_SIZE + 100 + i * (100))
+      self.writeText(loc, info[0], 24)
+      self.writeText((loc[0], loc[1] + 24), info[1], 24)
+    
+    lowerMiddle = (WINDOW_WIDTH // 2, WINDOW_HEIGHT - (SIDEBAR_SIZE // 2))
+    self.writeText(lowerMiddle, f"Current Player: Player {self.game.curTurn + 1}", 36)
+
+
   def printWinner(self):
-    font = pygame.font.SysFont('Corbel', 120)
-    text = font.render(self.game.getWinner(), True, "black", "beige")
-    textRect = text.get_rect()
-    textRect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
-    self.screen.blit(text, textRect)
+    self.writeText((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.game.getWinner(), 120)
 
   def drawGameState(self):
     self.screen.fill("beige")
@@ -91,6 +136,8 @@ class GameBoardUI:
         self.drawPlayer(player, i)
       for pos in self.game.getPossibleMoves():
         self.drawMoveButton(pos)
+      self.drawShop()
+      self.drawPlayerInfo()
     pygame.display.flip()
     
   def start(self):
@@ -107,5 +154,4 @@ class GameBoardUI:
 
     for updateFn in self.updateCallbacks:
       updateFn()
-    pygame.display.update()
 

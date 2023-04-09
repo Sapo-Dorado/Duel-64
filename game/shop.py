@@ -140,8 +140,9 @@ class Mine(Building):
   def base_price(self):
     return 10
   
-  def processTurn(self):
-    self.getOwner().sendMoney(1)
+  def processTurn(self, gameState):
+    if(self.getOwner() == gameState.currentPlayer()):
+      self.getOwner().sendMoney(1)
     return []
 
 class SpikeTrap(Building):
@@ -158,7 +159,7 @@ class SpikeTrap(Building):
     super().onPurchase(player, pos)
     self.activated = False
 
-  def processTurn(self):
+  def processTurn(self, gameState):
     if(self.activated):
       return removeInvalid(cardinalDirections(self.getPos(), 1))
     else:
@@ -184,18 +185,19 @@ class MoneyTree(Building):
       return super().vulnerable(player)
     return True
   
-  def processTurn(self):
-    self.turnCount += 1
-    if(self.turnCount >= 5):
-      self.getOwner().sendMoney(10)
-      targets = cardinalDirections(self.getPos(), 1)
-      x,y = self.getPos()
-      targets.append((x,y))
-      targets.append((x+1,y+1))
-      targets.append((x+1,y-1))
-      targets.append((x-1,y+1))
-      targets.append((x-1,y-1))
-      return removeInvalid(targets)
+  def processTurn(self, gameState):
+    if(self.getOwner() == gameState.currentPlayer()):
+      self.turnCount += 1
+      if(self.turnCount >= 5):
+        self.getOwner().sendMoney(10)
+        targets = cardinalDirections(self.getPos(), 1)
+        x,y = self.getPos()
+        targets.append((x,y))
+        targets.append((x+1,y+1))
+        targets.append((x+1,y-1))
+        targets.append((x-1,y+1))
+        targets.append((x-1,y-1))
+        return removeInvalid(targets)
     return []
 
 class Barrier(Building):
@@ -217,6 +219,6 @@ class Barrier(Building):
   def blocksMovement(self):
     return True
   
-  def processTurn(self):
+  def processTurn(self, gameState):
     return []
   
