@@ -117,9 +117,9 @@ class GameState:
     p1HasBuilding = False
     p2HasBuilding = False
     for building in self.buildings:
-      if(building.getOwner() == self.players[0]):
+      if(building.getOwner() == self.players[0] and building.countsForWin()):
         p1HasBuilding = True
-      if(building.getOwner() == self.players[1]):
+      if(building.getOwner() == self.players[1] and building.countsForWin()):
         p2HasBuilding = True
 
     p1Win = False
@@ -155,7 +155,18 @@ class GameState:
     return self.winner
   
   def validMovementPos(self, pos):
-    return validPosition(pos) and not self.board.blocksMovement(pos)
+    if not validPosition(pos):
+      return False
+
+    #check if barrier is in the way
+    curPos = self.currentPlayer().getPos()
+    dirX,dirY = constants.getDir(curPos, pos)
+    while(curPos != pos):
+      if(self.board.blocksMovement(curPos)):
+        return False
+      curPos = (curPos[0] + dirX, curPos[1] + dirY)
+
+    return not self.board.blocksMovement(pos)
 
   def validateMovementPos(self, pos):
     if not self.validMovementPos(pos):

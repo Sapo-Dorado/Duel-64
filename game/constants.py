@@ -16,6 +16,13 @@ def cardinalDirections(pos, distance):
 
   return result
 
+def getDir(oldPos, newPos):
+  oldX,oldY = oldPos
+  newX,newY = newPos
+  xDir = 0 if newX == oldX else (newX - oldX)//abs(newX - oldX)
+  yDir = 0 if newY == oldY else (newY - oldY)//abs(newY - oldY)
+  return (xDir, yDir)
+
 def validPosition(pos):
   for idx in pos:
     if(idx < 0 or idx >= BOARD_SIZE):

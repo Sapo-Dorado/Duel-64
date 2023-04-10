@@ -62,6 +62,9 @@ class Building(ShopObject):
 
   def isBuilding(self):
     return True
+  
+  def countsForWin(self):
+    return True
 
   def onPurchase(self, player, pos):
     if pos is None:

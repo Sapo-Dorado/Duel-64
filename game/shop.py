@@ -1,5 +1,5 @@
 from game.interfaces import WeaponItem, DefenseItem, MovementItem, Building, NoDefense, NoMovement, NoWeapon
-from game.constants import removeInvalid, cardinalDirections
+from game.constants import removeInvalid, cardinalDirections, getDir
 import game.constants as constants
 
 class BasicShop:
@@ -14,14 +14,6 @@ class BasicShop:
   
   def getItems(self):
     return self.items
-
-def getDir(oldPos, newPos):
-  oldX,oldY = oldPos
-  newX,newY = newPos
-  xDir = 0 if newX == oldX else (newX - oldX)//abs(newX - oldX)
-  yDir = 0 if newY == oldY else (newY - oldY)//abs(newY - oldY)
-  return (xDir, yDir)
-
 
 class Sword(WeaponItem):
   def name(self):
@@ -221,6 +213,9 @@ class Barrier(Building):
   
   def blocksMovement(self):
     return True
+  
+  def countsForWin(self):
+    return False
   
   def processTurn(self, gameState):
     return []
