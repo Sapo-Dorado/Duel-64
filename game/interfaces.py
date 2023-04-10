@@ -54,6 +54,9 @@ class Building(ShopObject):
   def vulnerable(self, player):
     return player != self.owner
   
+  def info(self):
+    return None
+
   def blocksMovement(self):
     return False
 

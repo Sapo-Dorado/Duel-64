@@ -25,25 +25,25 @@ def test_setup_generates_proper_board():
   game.passTurn()
 
   assert(game.currentPlayer() == game.players[1])
-  assert(game.currentPlayer().getBalance() == constants.STARTING_MONEY + 1)
+  assert(game.currentPlayer().getBalance() == constants.STARTING_MONEY)
   assert(game.otherPlayer() == game.players[0])
   assert(game.otherPlayer().getBalance() == constants.STARTING_MONEY + 1)
   assert(game.getWinner() is None)
 
 def test_validatePos():
   game = GameState()
-  game.validatePos(P1_START_POS)
-  game.validatePos(P2_START_POS)
+  game.validateMovementPos(P1_START_POS)
+  game.validateMovementPos(P2_START_POS)
   with pytest.raises(Exception, match=constants.INVALID_POS_MSG):
-    game.validatePos((-1,0))
+    game.validateMovementPos((-1,0))
   with pytest.raises(Exception, match=constants.INVALID_POS_MSG):
-    game.validatePos((0, -1))
+    game.validateMovementPos((0, -1))
   with pytest.raises(Exception, match=constants.INVALID_POS_MSG):
-    game.validatePos((0, BOARD_SIZE))
+    game.validateMovementPos((0, BOARD_SIZE))
   with pytest.raises(Exception, match=constants.INVALID_POS_MSG):
-    game.validatePos((BOARD_SIZE, 0))
+    game.validateMovementPos((BOARD_SIZE, 0))
   with pytest.raises(Exception, match=constants.INVALID_POS_MSG):
-    game.validatePos((BOARD_SIZE+10, -10))
+    game.validateMovementPos((BOARD_SIZE+10, -10))
 
 def test_getPossibleMoves():
   game = GameState()
@@ -132,7 +132,7 @@ def test_invalid_inputs_revert():
 
 def test_shop():
   game = GameState()
-  assert(len(game.getShopItems()) == 9)
+  assert(len(game.getShopItems()) == 10)
   item1 = game.extractItem(3)
   item2 = game.extractItem(3)
   assert(item1.name() == item2.name())
@@ -141,8 +141,8 @@ def test_shop():
 def test_spike_attack():
   game = GameState()
   game.currentPlayer().sendMoney(50)
-  trap = SpikeTrap()
-  game.processBuy(trap, (P2_START_POS[0],P2_START_POS[0]-1))
+  trap_idx = 8
+  game.processBuy(trap_idx, (P2_START_POS[0],P2_START_POS[0]-1))
   assert(game.currentPlayer().isAlive())
   assert(game.getWinner() == None)
   game.passTurn()
@@ -151,11 +151,15 @@ def test_spike_attack():
 
 def test_money_tree_attack():
   game = GameState()
-  tree = MoneyTree()
   buyer = game.currentPlayer()
   buyer.sendMoney(50)
   other = game.otherPlayer()
-  game.processBuy(tree, (P2_START_POS[0],P2_START_POS[0]-1))
+  tree_idx = 7
+  game.processBuy(tree_idx, (P2_START_POS[0],P2_START_POS[0]-1))
+  game.passTurn()
+  game.passTurn()
+  game.passTurn()
+  game.passTurn()
   game.passTurn()
   game.passTurn()
   game.passTurn()
@@ -171,9 +175,9 @@ def test_money_tree_attack():
 
 def test_barrier_blocks():
   game = GameState()
-  barrier = Barrier()
-  game.processBuy(barrier, (P2_START_POS[0],P2_START_POS[0]-1))
-  assert(game.otherPlayer().getBalance() == STARTING_MONEY + 1 - barrier.base_price())
+  barrier_idx = 9
+  game.processBuy(barrier_idx, (P2_START_POS[0],P2_START_POS[0]-1))
+  assert(game.otherPlayer().getBalance() == STARTING_MONEY + 1 - Barrier().base_price())
   with pytest.raises(Exception, match=INVALID_POS_MSG):
     game.processMove((P2_START_POS[0],P2_START_POS[0]-1))
   game.currentPlayer().setWeapon(Sword())

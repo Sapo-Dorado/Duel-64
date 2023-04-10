@@ -14,13 +14,13 @@ BACKGROUND_COLOR = "beige"
 TEXT_COLOR = "black"
 
 GAME_OBJECTS = {
-  game_constants.SWORD: BASE_PATH + "moneymaker.png",
-  game_constants.THROWING_STAR: BASE_PATH + "moneymaker.png",
-  game_constants.BOOTS: BASE_PATH + "moneymaker.png",
-  game_constants.WINGS: BASE_PATH + "moneymaker.png",
+  game_constants.SWORD: BASE_PATH + "sword.png",
+  game_constants.THROWING_STAR: BASE_PATH + "throwingStar.png",
+  game_constants.BOOTS: BASE_PATH + "boots.png",
+  game_constants.WINGS: BASE_PATH + "wings.jpg",
   game_constants.MINE: BASE_PATH + "moneymaker.png",
-  game_constants.SHIELD: BASE_PATH + "moneymaker.png",
-  game_constants.UPGRADED_SHIELD: BASE_PATH + "moneymaker.png",
+  game_constants.SHIELD: BASE_PATH + "shield.jpg",
+  game_constants.UPGRADED_SHIELD: BASE_PATH + "betterShield.jpg",
   game_constants.SPIKE_TRAP: BASE_PATH + "cactus.png",
   game_constants.MONEY_TREE: BASE_PATH + "moneytree.jpeg",
   game_constants.BARRIER: BASE_PATH + "barrier.png"

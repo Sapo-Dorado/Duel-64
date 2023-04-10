@@ -66,6 +66,8 @@ class GameBoardUI:
   def drawBuildings(self):
     for building in self.game.buildings:
       self.drawGridImage(building.getPos(), GAME_OBJECTS[building.name()])
+      if(building.info() is not None):
+        self.writeText(building.getPos(), building.info(), 18)
   
   def drawMoves(self):
     moves = self.game.getPossibleMoves()

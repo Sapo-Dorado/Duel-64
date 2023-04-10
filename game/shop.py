@@ -176,19 +176,22 @@ class MoneyTree(Building):
   def base_price(self):
     return 5
 
+  def info():
+    return self.turnCount
+
   def onPurchase(self, player, pos):
     super().onPurchase(player, pos)
-    self.turnCount = 0
+    self.turnCount = 5
   
   def vulnerable(self, player):
-    if(self.turnCount < 5):
+    if(self.turnCount > 0):
       return super().vulnerable(player)
     return True
   
   def processTurn(self, gameState):
     if(self.getOwner() == gameState.currentPlayer()):
-      self.turnCount += 1
-      if(self.turnCount >= 5):
+      self.turnCount -= 1
+      if(self.turnCount <= 0):
         self.getOwner().sendMoney(10)
         targets = cardinalDirections(self.getPos(), 1)
         x,y = self.getPos()
