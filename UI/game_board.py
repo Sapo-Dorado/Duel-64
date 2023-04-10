@@ -201,10 +201,11 @@ class GameBoardUI:
         if event.type == pygame.MOUSEBUTTONDOWN:
           mouse = pygame.mouse.get_pos()
           if self.withinBlock(center(i), mouse, imgSize // 2):
-            self.clearCallbacks()
             if(item.isBuilding()):
+              self.clearCallbacks()
               self.drawBuyScreen(i, item)
             elif self.game.currentPlayer().getBalance() >= item.price(0):
+              self.clearCallbacks()
               self.game.processBuy(i)
               self.drawGameState()
       return onEvent

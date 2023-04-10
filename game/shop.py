@@ -100,7 +100,7 @@ class Shield(DefenseItem):
     return constants.SHIELD_DESC
   
   def base_price(self):
-    return 5
+    return 2
 
   def onDamage(self, player):
     player.setPos(player.getStartingPosition())
@@ -116,7 +116,7 @@ class UpgradedShield(DefenseItem):
     return constants.UPGRADED_SHIELD_DESC
   
   def base_price(self):
-    return 10
+    return 5
 
   def onDamage(self, player):
     player.setPos(player.getStartingPosition())
