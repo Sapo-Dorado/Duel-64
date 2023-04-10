@@ -105,6 +105,7 @@ class GameBoardUI:
     items = shop.getItems()
     imgSize = BLOCK_SIZE
     textSize = 18
+    titleSize = 14
     descriptionCenter = (WINDOW_WIDTH // 2, 7 * SIDEBAR_SIZE // 8)
     prevItem = [0 for i in items]
 
@@ -123,12 +124,11 @@ class GameBoardUI:
     
     def name(i):
       cen = center(i)
-      return (cen[0], cen[1] + imgSize // 2 + textSize // 2 + 1)
+      return (cen[0], cen[1] + imgSize // 2 + titleSize // 2 + 1)
 
     for i,item in enumerate(items):
       rect = self.drawImage(leftCorner(i), GAME_OBJECTS[item.name()], imgSize)
-      title = self.writeText(name(i), item.name(), textSize)
-    pygame.display.update()
+      title = self.writeText(name(i), f"${item.price(0)}: {item.name()}", titleSize)
 
     def updateButtons():
       mouse = pygame.mouse.get_pos()
@@ -138,7 +138,7 @@ class GameBoardUI:
         if self.withinBlock(center(i), mouse, imgSize // 2):
           if(prevItem[i] != 1):
             rect = pygame.draw.circle(self.screen, "yellow", center(i), imgSize // 2)
-            title = self.writeText(name(i), item.name(), textSize)
+            title = self.writeText(name(i), f"${item.price(0)}: {item.name()}", titleSize)
             pygame.display.update([rect, title])
             writeDescription(item.description())
             prevItem[i] = 1
@@ -146,7 +146,7 @@ class GameBoardUI:
             hoveredItem = True
         elif prevItem[i] != 0:
           rect = self.drawImage(leftCorner(i), GAME_OBJECTS[item.name()], imgSize)
-          title = self.writeText(name(i), item.name(), textSize)
+          title = self.writeText(name(i), f"${item.price(0)}: {item.name()}", titleSize)
           pygame.display.update([rect, title])
           prevItem[i] = 0
           stateChange = True
