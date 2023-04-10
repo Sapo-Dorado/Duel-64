@@ -28,16 +28,15 @@ class GameBoardUI:
 
   def writeText(self, coords, text, size):
     font = pygame.font.SysFont('Corbel', size)
-    text = font.render(text, True, "black", "beige")
+    text = font.render(text, True,TEXT_COLOR, BACKGROUND_COLOR)
     textRect = text.get_rect()
     textRect.center = coords
-    self.screen.blit(text, textRect)
+    return self.screen.blit(text, textRect)
 
-  def drawImage(self, coords, name):
+  def drawImage(self, coords, name, size):
     image = pygame.image.load(name)
-    default_image_size = (BLOCK_SIZE * 1.25,BLOCK_SIZE * 1.25)
-    image_90 = pygame.transform.scale(image,default_image_size)
-    self.screen.blit(image_90, coords)
+    image_90 = pygame.transform.scale(image,(size,size))
+    return self.screen.blit(image_90, coords)
 
   def drawGridImage(self, pos ,name):
     x,y = pos
@@ -51,14 +50,13 @@ class GameBoardUI:
     for row in self.grid:
       for x,y in row:
         rect = pygame.Rect(x, y, BLOCK_SIZE, BLOCK_SIZE)
-        pygame.draw.rect(self.screen, "black", rect, 1)
+        pygame.draw.rect(self.screen,TEXT_COLOR, rect, 1)
   
   def gridCenter(self, pos):
     x,y = self.grid[pos[0]][pos[1]]
     return (x + BLOCK_SIZE // 2, y + BLOCK_SIZE // 2)
   
-  def withinBlock(self, center, pos):
-    maxDistance = BLOCK_SIZE // 2
+  def withinBlock(self, center, pos, maxDistance):
     return (pos[0] >= center[0] - maxDistance and pos[0] <= center[0] + maxDistance and
         pos[1] >= center[1] - maxDistance and pos[1] <= center[1] + maxDistance)
 
@@ -72,34 +70,92 @@ class GameBoardUI:
   def drawMoveButton(self, pos):
     center = self.gridCenter(pos)
 
+    prevRect = None
     def updateButton():
+      nonlocal prevRect
       mouse = pygame.mouse.get_pos()
       rect = None
-      if self.withinBlock(center, mouse):
+      curRect = None
+      if self.withinBlock(center, mouse, BLOCK_SIZE // 2):
         rect = pygame.draw.circle(self.screen, (240,230,140), center, PLAYER_RADIUS // 2)
+        curRect = 0
       else:
         rect = pygame.draw.circle(self.screen, "yellow", center, PLAYER_RADIUS // 2)
-      pygame.display.update(rect)
+        curRect = 1
+      if(prevRect != curRect):
+        prevRect = curRect
+        pygame.display.update(rect)
 
     def onEvent(event):
-      mouse = pygame.mouse.get_pos()
       if event.type == pygame.MOUSEBUTTONDOWN:
-        if self.withinBlock(center, mouse):
+        mouse = pygame.mouse.get_pos()
+        if self.withinBlock(center, mouse, BLOCK_SIZE // 2):
           self.game.processMove(pos)
           self.clearCallbacks()
           self.drawGameState()
-          return
 
     self.updateCallbacks.append(updateButton)
     self.eventCallbacks.append(onEvent)
 
   def drawShop(self):
+    self.writeText((WINDOW_WIDTH // 2, SIDEBAR_SIZE // 8), "Shop", 30)
+
     shop = self.game.shop
     items = shop.getItems()
-    for i,item in enumerate(items):
-      x = 10 + ((WINDOW_WIDTH - 20) * i) // len(items)
-      self.drawImage((x, SIDEBAR_SIZE // 4), GAME_OBJECTS[items[i].name()])
-    self.writeText((WINDOW_WIDTH // 2, SIDEBAR_SIZE // 8), "Shop", 30)
+    imgSize = BLOCK_SIZE * 1.25
+    textSize = 18
+    descriptionCenter = (WINDOW_WIDTH // 2, 7 * SIDEBAR_SIZE // 8)
+    prevItem = [1 for i in items]
+
+    def writeDescription(description=None):
+      cover = pygame.draw.rect(self.screen, BACKGROUND_COLOR, pygame.Rect(0,descriptionCenter[1] - textSize // 2 - 1, WINDOW_WIDTH, textSize + 2))
+
+      text = self.writeText(descriptionCenter, description, textSize)
+      pygame.display.update([cover, text])
+
+    def leftCorner(i):
+      return (10 + ((WINDOW_WIDTH - 20) * i) // len(items), SIDEBAR_SIZE // 4)
+    
+    def center(i):
+      corner = leftCorner(i)
+      return (corner[0] + imgSize // 2, corner[1] + imgSize // 2)
+
+
+    def updateButtons():
+      mouse = pygame.mouse.get_pos()
+      hoveredItem = False
+      stateChange = False
+      for i,item in enumerate(items):
+        if self.withinBlock(center(i), mouse, imgSize // 2):
+          if(prevItem[i] != 1):
+            rect = pygame.draw.circle(self.screen, "yellow", center(i), imgSize // 2)
+            pygame.display.update(rect)
+            writeDescription(f"{item.name()}: {item.description()}")
+            prevItem[i] = 1
+            stateChange = True
+            hoveredItem = True
+        elif prevItem[i] != 0:
+          rect = self.drawImage(leftCorner(i), GAME_OBJECTS[item.name()], imgSize)
+          pygame.display.update(rect)
+          prevItem[i] = 0
+          stateChange = True
+      if stateChange and not hoveredItem:
+        writeDescription()
+  
+    def onEventGenerator(i, item):
+      def onEvent(event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+          mouse = pygame.mouse.get_pos()
+          if self.withinBlock(center(i), mouse, imgSize // 2):
+            self.clearCallbacks()
+            self.drawBuyScreen(item)
+      return onEvent
+
+    self.updateCallbacks.append(updateButtons)
+    for i, item in enumerate(items):
+      self.eventCallbacks.append(onEventGenerator(i, item))
+      
+        
 
   def drawPlayerInfo(self):
     p1Info = getPlayerItemInfo(self.game.players[0])
@@ -124,8 +180,11 @@ class GameBoardUI:
   def printWinner(self):
     self.writeText((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.game.getWinner(), 120)
 
+  def drawBuyScreen(self, item):
+    print("buying time")
+
   def drawGameState(self):
-    self.screen.fill("beige")
+    self.screen.fill( BACKGROUND_COLOR)
     if(self.game.getWinner() is not None):
       self.printWinner()
     else:

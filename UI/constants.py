@@ -10,6 +10,9 @@ BASE_PATH = "./UI/images/"
 PLAYER1_IMG = BASE_PATH + "blueberry.png"
 PLAYER2_IMG = BASE_PATH + "watermelon.png"
 
+BACKGROUND_COLOR = "beige"
+TEXT_COLOR = "black"
+
 GAME_OBJECTS = {
   game_constants.SWORD: BASE_PATH + "moneymaker.png",
   game_constants.THROWING_STAR: BASE_PATH + "moneymaker.png",
