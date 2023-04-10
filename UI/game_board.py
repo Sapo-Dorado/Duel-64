@@ -67,6 +67,48 @@ class GameBoardUI:
     for building in self.game.buildings:
       self.drawGridImage(building.getPos(), GAME_OBJECTS[building.name()])
   
+  def drawMoves(self):
+    moves = self.game.getPossibleMoves()
+    if(len(moves) > 0):
+      for pos in moves:
+        self.drawMoveButton(pos)
+    else:
+      center = self.gridCenter(self.game.currentPlayer().getPos())
+      prevRect = None
+      def updateButton():
+        nonlocal prevRect
+        mouse = pygame.mouse.get_pos()
+        rect = None
+        curRect = None
+        text = None
+        if self.withinBlock(center, mouse, BLOCK_SIZE // 2):
+          rect = pygame.draw.circle(self.screen, (220, 20, 60), center, PLAYER_RADIUS)
+          text = self.writeText(center, "Concede?", 14, (220, 20, 60))
+          curRect = 0
+        else:
+          rect = pygame.draw.circle(self.screen, "red", center, PLAYER_RADIUS)
+          text = self.writeText(center, "Concede?", 14, "red")
+          curRect = 1
+        if(prevRect != curRect):
+          prevRect = curRect
+          pygame.display.update([rect, text])
+
+      def onEvent(event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+          mouse = pygame.mouse.get_pos()
+          if self.withinBlock(center, mouse, BLOCK_SIZE // 2):
+            self.game.processConcede()
+            self.clearCallbacks()
+            self.drawGameState()
+
+      rect = pygame.draw.circle(self.screen, "red", center, PLAYER_RADIUS // 2)
+      text = self.writeText(center, "Concede?", 14, "red")
+      self.updateCallbacks.append(updateButton)
+      self.eventCallbacks.append(onEvent)
+
+      
+
+
   def drawMoveButton(self, pos):
     center = self.gridCenter(pos)
 
@@ -286,8 +328,7 @@ class GameBoardUI:
       self.drawGrid()
       self.drawBuildings()
       self.drawPlayers()
-      for pos in self.game.getPossibleMoves():
-        self.drawMoveButton(pos)
+      self.drawMoves()
       self.drawShop()
       self.drawPlayerInfo()
     pygame.display.flip()
