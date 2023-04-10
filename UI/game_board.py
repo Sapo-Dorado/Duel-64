@@ -21,7 +21,6 @@ class GameBoardUI:
     self.eventCallbacks = []
     self.start()
 
-
   def clearCallbacks(self):
     self.updateCallbacks = []
     self.eventCallbacks = []
@@ -60,12 +59,13 @@ class GameBoardUI:
     return (pos[0] >= center[0] - maxDistance and pos[0] <= center[0] + maxDistance and
         pos[1] >= center[1] - maxDistance and pos[1] <= center[1] + maxDistance)
 
-  def drawPlayer(self, player, playerNum):
-    players = [PLAYER1_IMG, PLAYER2_IMG]
-    self.drawGridImage(player.getPos(), players[playerNum])
+  def drawPlayers(self):
+    self.drawGridImage(self.game.players[0].getPos(), PLAYER1_IMG)
+    self.drawGridImage(self.game.players[1].getPos(), PLAYER2_IMG)
   
-  def drawBuilding(self, building):
-    self.drawGridImage(building.getPos(), GAME_OBJECTS[building.name()])
+  def drawBuildings(self):
+    for building in self.game.buildings:
+      self.drawGridImage(building.getPos(), GAME_OBJECTS[building.name()])
   
   def drawMoveButton(self, pos):
     center = self.gridCenter(pos)
@@ -160,9 +160,9 @@ class GameBoardUI:
           if self.withinBlock(center(i), mouse, imgSize // 2):
             self.clearCallbacks()
             if(item.isBuilding()):
-              self.drawBuyScreen(item)
+              self.drawBuyScreen(i, item)
             elif self.game.currentPlayer().getBalance() >= item.price(0):
-              self.game.processBuy(item)
+              self.game.processBuy(i)
               self.drawGameState()
       return onEvent
 
@@ -195,7 +195,7 @@ class GameBoardUI:
   def printWinner(self):
     self.writeText((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.game.getWinner(), 120)
   
-  def drawBuyButtons(self, item):
+  def drawBuyButtons(self, i, item):
     text = self.writeText((WINDOW_WIDTH // 2, SIDEBAR_SIZE // 2), f"Purchasing {item.name()}", 36)
     center = (WINDOW_WIDTH - SIDEBAR_SIZE // 2, SIDEBAR_SIZE // 2)
     cancelButtonSize = BLOCK_SIZE // 2
@@ -255,7 +255,7 @@ class GameBoardUI:
           mouse = pygame.mouse.get_pos()
           if self.withinBlock(self.gridCenter(pos), mouse, buyButtonSize):
             self.clearCallbacks()
-            self.game.processBuy(item, pos)
+            self.game.processBuy(i, pos)
             self.drawGameState()
       return [updateButton, onEvent]
 
@@ -268,28 +268,24 @@ class GameBoardUI:
       self.eventCallbacks.append(onEvent)
 
 
-  def drawBuyScreen(self, item):
+  def drawBuyScreen(self, i, item):
     self.screen.fill(BACKGROUND_COLOR)
     self.drawGrid()
-    for building in self.game.buildings:
-      self.drawBuilding(building)
-    for i,player in enumerate(self.game.players):
-      self.drawPlayer(player, i)
+    self.drawBuildings()
+    self.drawPlayers()
     self.drawPlayerInfo()
-    self.drawBuyButtons(item)
+    self.drawBuyButtons(i, item)
     pygame.display.flip()
     
 
   def drawGameState(self):
-    self.screen.fill( BACKGROUND_COLOR)
+    self.screen.fill(BACKGROUND_COLOR)
     if(self.game.getWinner() is not None):
       self.printWinner()
     else:
       self.drawGrid()
-      for building in self.game.buildings:
-        self.drawBuilding(building)
-      for i,player in enumerate(self.game.players):
-        self.drawPlayer(player, i)
+      self.drawBuildings()
+      self.drawPlayers()
       for pos in self.game.getPossibleMoves():
         self.drawMoveButton(pos)
       self.drawShop()

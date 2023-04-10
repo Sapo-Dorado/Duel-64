@@ -94,10 +94,11 @@ class GameState:
     self.attackTiles(attackedTiles, curPlayer)
     self.passTurn()
   
-  def processBuy(self, shopObj, pos=None):
+  def processBuy(self, i, pos=None):
     if self.winner is not None:
       return
     currentPlayer = self.currentPlayer()
+    shopObj = self.shop.extractItem(i)
     if pos is not None:
       self.validateBuyPos(pos)
       shopObj.buy(currentPlayer, pos)
