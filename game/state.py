@@ -78,12 +78,17 @@ class GameState:
   def getPossibleMoves(self):
     if self.winner is not None:
       return []
-    return self.currentPlayer().getPossibleMoves()
+    moves = self.currentPlayer().getPossibleMoves()
+    result = []
+    for move in moves:
+      if self.validMovementPos(move):
+        result.append(move)
+    return result
   
   def processMove(self, pos):
     if self.winner is not None:
       return
-    self.validatePos(pos)
+    self.validateMovementPos(pos)
     curPlayer = self.currentPlayer()
     attackedTiles = curPlayer.processMove(pos)
     self.attackTiles(attackedTiles, curPlayer)
@@ -94,7 +99,7 @@ class GameState:
       return
     currentPlayer = self.currentPlayer()
     if pos is not None:
-      self.validatePos(pos)
+      self.validateBuyPos(pos)
       shopObj.buy(currentPlayer, pos)
       self.board.addBoardObject(shopObj, pos, self.buildings)
     else:
@@ -131,11 +136,21 @@ class GameState:
       return True
     return False
   
+  def getPrices(self, item):
+    return self.currentPlayer().getPrices(item)
+
   def getWinner(self):
     return self.winner
   
-  def validatePos(self, pos):
-    if not validPosition(pos) or self.board.blocksMovement(pos):
+  def validMovementPos(self, pos):
+    return validPosition(pos) and not self.board.blocksMovement(pos)
+
+  def validateMovementPos(self, pos):
+    if not self.validMovementPos(pos):
+      raise Exception(constants.INVALID_POS_MSG)
+
+  def validateBuyPos(self, pos):
+    if not validPosition(pos):
       raise Exception(constants.INVALID_POS_MSG)
   
 

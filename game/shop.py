@@ -4,8 +4,8 @@ import game.constants as constants
 
 class BasicShop:
   def __init__(self):
-    self.items = [Sword(), ThrowingStar(), Boots(), Wings(), Shield(), UpgradedShield(), Mine(), SpikeTrap(), MoneyTree()]
-    self.constructors = [Sword, ThrowingStar, Boots, Wings, Shield, UpgradedShield, Mine, SpikeTrap, MoneyTree]
+    self.items = [Sword(), ThrowingStar(), Boots(), Wings(), Shield(), UpgradedShield(), Mine(), MoneyTree(), SpikeTrap(), Barrier()]
+    self.constructors = [Sword, ThrowingStar, Boots, Wings, Shield, UpgradedShield, Mine, MoneyTree, SpikeTrap, Barrier]
   
   def extractItem(self, idx):
     item = self.items[idx]

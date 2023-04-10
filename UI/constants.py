@@ -21,9 +21,9 @@ GAME_OBJECTS = {
   game_constants.MINE: BASE_PATH + "moneymaker.png",
   game_constants.SHIELD: BASE_PATH + "moneymaker.png",
   game_constants.UPGRADED_SHIELD: BASE_PATH + "moneymaker.png",
-  game_constants.SPIKE_TRAP: BASE_PATH + "moneymaker.png",
+  game_constants.SPIKE_TRAP: BASE_PATH + "cactus.png",
   game_constants.MONEY_TREE: BASE_PATH + "moneytree.jpeg",
-  game_constants.BARRIER: BASE_PATH + "moneymaker.png"
+  game_constants.BARRIER: BASE_PATH + "barrier.png"
 }
 
 def getPlayerItemInfo(player):

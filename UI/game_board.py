@@ -26,9 +26,9 @@ class GameBoardUI:
     self.updateCallbacks = []
     self.eventCallbacks = []
 
-  def writeText(self, coords, text, size):
+  def writeText(self, coords, text, size, color=BACKGROUND_COLOR):
     font = pygame.font.SysFont('Corbel', size)
-    text = font.render(text, True,TEXT_COLOR, BACKGROUND_COLOR)
+    text = font.render(text, True,TEXT_COLOR, color)
     textRect = text.get_rect()
     textRect.center = coords
     return self.screen.blit(text, textRect)
@@ -94,6 +94,7 @@ class GameBoardUI:
           self.clearCallbacks()
           self.drawGameState()
 
+    rect = pygame.draw.circle(self.screen, "yellow", center, PLAYER_RADIUS // 2)
     self.updateCallbacks.append(updateButton)
     self.eventCallbacks.append(onEvent)
 
@@ -102,10 +103,10 @@ class GameBoardUI:
 
     shop = self.game.shop
     items = shop.getItems()
-    imgSize = BLOCK_SIZE * 1.25
+    imgSize = BLOCK_SIZE
     textSize = 18
     descriptionCenter = (WINDOW_WIDTH // 2, 7 * SIDEBAR_SIZE // 8)
-    prevItem = [1 for i in items]
+    prevItem = [0 for i in items]
 
     def writeDescription(description=None):
       cover = pygame.draw.rect(self.screen, BACKGROUND_COLOR, pygame.Rect(0,descriptionCenter[1] - textSize // 2 - 1, WINDOW_WIDTH, textSize + 2))
@@ -119,7 +120,15 @@ class GameBoardUI:
     def center(i):
       corner = leftCorner(i)
       return (corner[0] + imgSize // 2, corner[1] + imgSize // 2)
+    
+    def name(i):
+      cen = center(i)
+      return (cen[0], cen[1] + imgSize // 2 + textSize // 2 + 1)
 
+    for i,item in enumerate(items):
+      rect = self.drawImage(leftCorner(i), GAME_OBJECTS[item.name()], imgSize)
+      title = self.writeText(name(i), item.name(), textSize)
+    pygame.display.update()
 
     def updateButtons():
       mouse = pygame.mouse.get_pos()
@@ -129,14 +138,16 @@ class GameBoardUI:
         if self.withinBlock(center(i), mouse, imgSize // 2):
           if(prevItem[i] != 1):
             rect = pygame.draw.circle(self.screen, "yellow", center(i), imgSize // 2)
-            pygame.display.update(rect)
-            writeDescription(f"{item.name()}: {item.description()}")
+            title = self.writeText(name(i), item.name(), textSize)
+            pygame.display.update([rect, title])
+            writeDescription(item.description())
             prevItem[i] = 1
             stateChange = True
             hoveredItem = True
         elif prevItem[i] != 0:
           rect = self.drawImage(leftCorner(i), GAME_OBJECTS[item.name()], imgSize)
-          pygame.display.update(rect)
+          title = self.writeText(name(i), item.name(), textSize)
+          pygame.display.update([rect, title])
           prevItem[i] = 0
           stateChange = True
       if stateChange and not hoveredItem:
@@ -148,7 +159,11 @@ class GameBoardUI:
           mouse = pygame.mouse.get_pos()
           if self.withinBlock(center(i), mouse, imgSize // 2):
             self.clearCallbacks()
-            self.drawBuyScreen(item)
+            if(item.isBuilding()):
+              self.drawBuyScreen(item)
+            elif self.game.currentPlayer().getBalance() >= item.price(0):
+              self.game.processBuy(item)
+              self.drawGameState()
       return onEvent
 
     self.updateCallbacks.append(updateButtons)
@@ -179,9 +194,91 @@ class GameBoardUI:
 
   def printWinner(self):
     self.writeText((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.game.getWinner(), 120)
+  
+  def drawBuyButtons(self, item):
+    text = self.writeText((WINDOW_WIDTH // 2, SIDEBAR_SIZE // 2), f"Purchasing {item.name()}", 36)
+    center = (WINDOW_WIDTH - SIDEBAR_SIZE // 2, SIDEBAR_SIZE // 2)
+    cancelButtonSize = BLOCK_SIZE // 2
+    dark_yellow = (240,230,140)
+    prevCircle = 0
+    def updateCancelButton():
+      nonlocal prevCircle
+      mouse = pygame.mouse.get_pos()
+      circle = None
+      desc = None
+      if(self.withinBlock(center, mouse, cancelButtonSize)):
+        circle = pygame.draw.circle(self.screen, dark_yellow, center, cancelButtonSize)
+        desc = self.writeText(center, "Cancel", 24, dark_yellow)
+        curCircle = 1
+      else:
+        circle = pygame.draw.circle(self.screen, "yellow", center, cancelButtonSize)
+        desc = self.writeText(center, "Cancel", 24, "yellow")
+        curCircle = 0
+      if prevCircle != curCircle:
+        prevCircle = curCircle
+        pygame.display.update([circle, desc])
+    def onCancelEvent(event):
+      if event.type == pygame.MOUSEBUTTONDOWN:
+        mouse = pygame.mouse.get_pos()
+        if self.withinBlock(center, mouse, cancelButtonSize):
+          self.clearCallbacks()
+          self.drawGameState()
+
+    circle = pygame.draw.circle(self.screen, "yellow", center, cancelButtonSize)
+    desc = self.writeText(center, "Cancel", 24, "yellow")
+    self.updateCallbacks.append(updateCancelButton)
+    self.eventCallbacks.append(onCancelEvent)
+
+    buyButtonSize = BLOCK_SIZE // 3
+    dark_green = (1,50,32)
+    def updateButtonGenerator(pos,price):
+      prevButton = 0
+      def updateButton():
+        nonlocal prevButton
+        mouse = pygame.mouse.get_pos()
+        button = None
+        desc = None
+        if(self.withinBlock(self.gridCenter(pos), mouse, buyButtonSize)):
+          button = pygame.draw.circle(self.screen, dark_green, self.gridCenter(pos), buyButtonSize)
+          desc = self.writeText(self.gridCenter(pos), f"${price}", 24, dark_green)
+          curButton = 1
+        else:
+          button = pygame.draw.circle(self.screen, "green", self.gridCenter(pos), buyButtonSize)
+          desc = self.writeText(self.gridCenter(pos), f"${price}", 24, "green")
+          curButton = 0
+        if prevButton != curButton:
+          prevButton = curButton
+          pygame.display.update([button, desc])
+      
+      def onEvent(event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+          mouse = pygame.mouse.get_pos()
+          if self.withinBlock(self.gridCenter(pos), mouse, buyButtonSize):
+            self.clearCallbacks()
+            self.game.processBuy(item, pos)
+            self.drawGameState()
+      return [updateButton, onEvent]
+
+    for pos, price in self.game.getPrices(item):
+      button = pygame.draw.circle(self.screen, "green", self.gridCenter(pos), buyButtonSize)
+      desc = self.writeText(self.gridCenter(pos), f"${price}", 24, "green")
+
+      [updateButton, onEvent] = updateButtonGenerator(pos, price)
+      self.updateCallbacks.append(updateButton)
+      self.eventCallbacks.append(onEvent)
+
 
   def drawBuyScreen(self, item):
-    print("buying time")
+    self.screen.fill(BACKGROUND_COLOR)
+    self.drawGrid()
+    for building in self.game.buildings:
+      self.drawBuilding(building)
+    for i,player in enumerate(self.game.players):
+      self.drawPlayer(player, i)
+    self.drawPlayerInfo()
+    self.drawBuyButtons(item)
+    pygame.display.flip()
+    
 
   def drawGameState(self):
     self.screen.fill( BACKGROUND_COLOR)
