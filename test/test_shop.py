@@ -1,4 +1,5 @@
 from game.shop import *
+from game.state import GameState
 from game.interfaces import Player
 
 def test_sword():
@@ -95,7 +96,7 @@ def test_spike_trap():
   spike = SpikeTrap()
   spike.activated = True
   spike.setPos((4,4))
-  range1 = spike.processTurn()
+  range1 = spike.processTurn(None)
   assert(len(range1) == 4)
   assert((5,4) in range1)
   assert((4,5) in range1)
@@ -103,17 +104,18 @@ def test_spike_trap():
   assert((3,4) in range1)
 
   spike.setPos((0,0))
-  range2 = spike.processTurn()
+  range2 = spike.processTurn(None)
   assert(len(range2) == 2)
   assert((0,1) in range2)
   assert((1,0) in range2)
 
 def test_money_tree():
+  game = GameState()
   tree = MoneyTree()
-  tree.turnCount = 5
-  tree.setOwner(Player((0,0)))
+  tree.turnCount = 0
+  tree.setOwner(game.players[0])
   tree.setPos((4,4))
-  range1 = tree.processTurn()
+  range1 = tree.processTurn(game)
   assert(len(range1) == 9)
   assert((4,4) in range1)
   assert((5,5) in range1)
@@ -126,7 +128,7 @@ def test_money_tree():
   assert((3,4) in range1)
 
   tree.setPos((0,0))
-  range2 = tree.processTurn()
+  range2 = tree.processTurn(game)
   assert(len(range2) == 4)
   assert((0,0) in range2)
   assert((0,1) in range2)

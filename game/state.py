@@ -56,7 +56,7 @@ class GameState:
   
   def processBuildings(self):
     for building in self.buildings:
-      attackedTiles = building.processTurn()
+      attackedTiles = building.processTurn(self)
       self.attackTiles(attackedTiles, building.getOwner())
 
   def getBoard(self):
@@ -76,23 +76,41 @@ class GameState:
     return self.shop.extractItem(idx)
 
   def getPossibleMoves(self):
-    return self.currentPlayer().getPossibleMoves()
+    if self.winner is not None:
+      return []
+    moves = self.currentPlayer().getPossibleMoves()
+    result = []
+    for move in moves:
+      if self.validMovementPos(move):
+        result.append(move)
+    return result
   
   def processMove(self, pos):
-    self.validatePos(pos)
+    if self.winner is not None:
+      return
+    self.validateMovementPos(pos)
     curPlayer = self.currentPlayer()
     attackedTiles = curPlayer.processMove(pos)
     self.attackTiles(attackedTiles, curPlayer)
     self.passTurn()
   
-  def processBuy(self, shopObj, pos=None):
+  def processBuy(self, i, pos=None):
+    if self.winner is not None:
+      return
     currentPlayer = self.currentPlayer()
+    shopObj = self.shop.extractItem(i)
     if pos is not None:
-      self.validatePos(pos)
+      self.validateBuyPos(pos, shopObj)
       shopObj.buy(currentPlayer, pos)
       self.board.addBoardObject(shopObj, pos, self.buildings)
     else:
       shopObj.buy(currentPlayer, currentPlayer.getPos())
+    self.passTurn()
+  
+  def processConcede(self):
+    if(len(self.getPossibleMoves()) > 0):
+      raise Exception("Can't concede")
+    self.winner = constants.P2_WIN_MSG if self.currentPlayer() is self.players[0] else constants.P1_WIN_MSG
     self.passTurn()
   
   def checkWin(self):
@@ -125,11 +143,30 @@ class GameState:
       return True
     return False
   
+  def getPrices(self, item):
+    result = []
+    for price in self.currentPlayer().getPrices(item):
+      pos, _ = price
+      if(self.validBuyPos(pos, item)):
+        result.append(price)
+    return result
+
   def getWinner(self):
     return self.winner
   
-  def validatePos(self, pos):
-    if not validPosition(pos) or self.board.blocksMovement(pos):
+  def validMovementPos(self, pos):
+    return validPosition(pos) and not self.board.blocksMovement(pos)
+
+  def validateMovementPos(self, pos):
+    if not self.validMovementPos(pos):
       raise Exception(constants.INVALID_POS_MSG)
+
+  def validBuyPos(self, pos, item):
+    return validPosition(pos) and not (item.blocksMovement() and (self.board.getBoardObject(pos) is not None or self.otherPlayer().getPos() == pos))
+
+  def validateBuyPos(self, pos, item):
+    if not self.validBuyPos(pos, item) :
+      raise Exception(constants.INVALID_POS_MSG)
+  
 
   

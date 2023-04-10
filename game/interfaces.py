@@ -18,6 +18,9 @@ class ShopObject(ABC):
   def onPurchase(self, player):
     pass
 
+  def isBuilding(self):
+    return False
+
   def base_price(self):
     return 0
 
@@ -51,8 +54,14 @@ class Building(ShopObject):
   def vulnerable(self, player):
     return player != self.owner
   
+  def info(self):
+    return None
+
   def blocksMovement(self):
     return False
+
+  def isBuilding(self):
+    return True
 
   def onPurchase(self, player, pos):
     if pos is None:
@@ -62,7 +71,7 @@ class Building(ShopObject):
     
   #Should return the tiles being attacked, if any
   @abstractmethod
-  def processTurn(self):
+  def processTurn(self, gameState):
     pass
 
 class WeaponItem(ShopObject):
@@ -179,6 +188,17 @@ class Player():
   
   def getPossibleMoves(self):
     return self.movement.getPossibleSquares(self.getPos())
+  
+  def getPrices(self, item):
+    prices = []
+    for x in range(constants.BOARD_SIZE):
+      for y in range(constants.BOARD_SIZE):
+        itemPos = (x,y)
+        itemPrice = item.price(distance(self.getPos(), itemPos))
+        if(itemPrice <= self.getBalance()):
+          prices.append((itemPos, itemPrice))
+    return prices
+
   
   def processDamage(self):
     self.defense.onDamage(self)
