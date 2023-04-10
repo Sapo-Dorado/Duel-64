@@ -60,8 +60,10 @@ class GameBoardUI:
         pos[1] >= center[1] - maxDistance and pos[1] <= center[1] + maxDistance)
 
   def drawPlayers(self):
-    self.drawGridImage(self.game.players[0].getPos(), PLAYER1_IMG)
-    self.drawGridImage(self.game.players[1].getPos(), PLAYER2_IMG)
+    if(self.game.players[0].isAlive()):
+      self.drawGridImage(self.game.players[0].getPos(), PLAYER1_IMG)
+    if(self.game.players[1].isAlive()):
+      self.drawGridImage(self.game.players[1].getPos(), PLAYER2_IMG)
   
   def drawBuildings(self):
     for building in self.game.buildings:
