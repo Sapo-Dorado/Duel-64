@@ -67,7 +67,7 @@ class GameBoardUI:
     for building in self.game.buildings:
       self.drawGridImage(building.getPos(), GAME_OBJECTS[building.name()])
       if(building.info() is not None):
-        self.writeText(building.getPos(), building.info(), 18)
+        self.writeText(self.gridCenter(building.getPos()), building.info(), 36)
   
   def drawMoves(self):
     moves = self.game.getPossibleMoves()
@@ -107,9 +107,6 @@ class GameBoardUI:
       text = self.writeText(center, "Concede?", 14, "red")
       self.updateCallbacks.append(updateButton)
       self.eventCallbacks.append(onEvent)
-
-      
-
 
   def drawMoveButton(self, pos):
     center = self.gridCenter(pos)
@@ -233,11 +230,17 @@ class GameBoardUI:
       self.writeText((loc[0], loc[1] + 24), info[1], 24)
     
     lowerMiddle = (WINDOW_WIDTH // 2, WINDOW_HEIGHT - (SIDEBAR_SIZE // 2))
-    self.writeText(lowerMiddle, f"Current Player: Player {self.game.curTurn + 1}", 36)
+    if(self.game.getWinner() is None):
+      self.writeText(lowerMiddle, f"Current Player: Player {self.game.curTurn + 1}", 36)
+    else:
+      self.writeText(lowerMiddle, self.game.getWinner(), 36)
 
 
   def printWinner(self):
-    self.writeText((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.game.getWinner(), 120)
+    self.drawGrid()
+    self.drawBuildings()
+    self.drawPlayers()
+    self.drawPlayerInfo()
   
   def drawBuyButtons(self, i, item):
     text = self.writeText((WINDOW_WIDTH // 2, SIDEBAR_SIZE // 2), f"Purchasing {item.name()}", 36)

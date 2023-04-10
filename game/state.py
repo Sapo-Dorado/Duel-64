@@ -110,7 +110,7 @@ class GameState:
   def processConcede(self):
     if(len(self.getPossibleMoves()) > 0):
       raise Exception("Can't concede")
-    self.winner = constants.P1_WIN_MSG if self.currentPlayer() is self.players[0] else constants.P2_WIN_MSG
+    self.winner = constants.P2_WIN_MSG if self.currentPlayer() is self.players[0] else constants.P1_WIN_MSG
     self.passTurn()
   
   def checkWin(self):

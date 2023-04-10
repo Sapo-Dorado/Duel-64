@@ -176,8 +176,8 @@ class MoneyTree(Building):
   def base_price(self):
     return 5
 
-  def info():
-    return self.turnCount
+  def info(self):
+    return str(self.turnCount)
 
   def onPurchase(self, player, pos):
     super().onPurchase(player, pos)
