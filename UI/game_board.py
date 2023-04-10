@@ -180,17 +180,18 @@ class GameBoardUI:
       for i,item in enumerate(items):
         if self.withinBlock(center(i), mouse, imgSize // 2):
           if(prevItem[i] != 1):
-            rect = pygame.draw.circle(self.screen, "yellow", center(i), imgSize // 2)
-            title = self.writeText(name(i), f"${item.price(0)}: {item.name()}", titleSize)
-            pygame.display.update([rect, title])
+            s = pygame.Surface((imgSize,imgSize))
+            s.set_alpha(128)
+            s.fill((128,128,128))
+            shade = self.screen.blit(s, leftCorner(i))
+            pygame.display.update(shade)
             writeDescription(item.description())
             prevItem[i] = 1
             stateChange = True
             hoveredItem = True
         elif prevItem[i] != 0:
           rect = self.drawImage(leftCorner(i), GAME_OBJECTS[item.name()], imgSize)
-          title = self.writeText(name(i), f"${item.price(0)}: {item.name()}", titleSize)
-          pygame.display.update([rect, title])
+          pygame.display.update(rect)
           prevItem[i] = 0
           stateChange = True
       if stateChange and not hoveredItem:
