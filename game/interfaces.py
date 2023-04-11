@@ -65,6 +65,9 @@ class Building(ShopObject):
   
   def countsForWin(self):
     return True
+  
+  def cantReplace(self):
+    return False
 
   def onPurchase(self, player, pos):
     if pos is None:

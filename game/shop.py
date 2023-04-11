@@ -147,6 +147,9 @@ class SpikeTrap(Building):
   def base_price(self):
     return 5
   
+  def cantReplace(self):
+    return True
+
   def onPurchase(self, player, pos):
     super().onPurchase(player, pos)
     self.activated = False
@@ -216,6 +219,9 @@ class Barrier(Building):
   
   def countsForWin(self):
     return False
+  
+  def cantReplace(self):
+    return True
   
   def processTurn(self, gameState):
     return []
