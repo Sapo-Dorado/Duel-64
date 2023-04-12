@@ -1,6 +1,9 @@
 # Duel-64
 
 ## How to Play
+See Rules.pdf in the main directory
+
+## How to Run
 ```
 git clone https://github.com/Sapo-Dorado/Duel-64.git
 cd Duel-64
