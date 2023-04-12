@@ -1,7 +1,7 @@
 # Duel-64
 
 ## How to Play
-See Rules.pdf in the main directory
+See `Rules.pdf` in the main directory
 
 ## How to Run
 ```
