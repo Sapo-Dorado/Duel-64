@@ -173,7 +173,7 @@ class GameState:
       raise Exception(constants.INVALID_POS_MSG)
 
   def validBuyPos(self, pos, item):
-    return validPosition(pos) and not (item.cantReplace() and (self.board.getBoardObject(pos) is not None or self.currentPlayer.getPos() == pos or self.otherPlayer().getPos() == pos))
+    return validPosition(pos) and not (item.cantReplace() and (self.board.getBoardObject(pos) is not None or self.currentPlayer().getPos() == pos or self.otherPlayer().getPos() == pos))
 
   def validateBuyPos(self, pos, item):
     if not self.validBuyPos(pos, item) :
