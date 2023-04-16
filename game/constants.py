@@ -65,4 +65,4 @@ SPIKE_TRAP_DESC = "Attacks enemies and enemy buildings within one square in all 
 MONEY_TREE = "Money Tree"
 MONEY_TREE_DESC = "After 5 turns, produce 10 gold and self destruct. Goes out with a bang!"
 BARRIER = "Barrier"
-BARRIER_DESC = "Can be placed on any empty square for free. Blocks movement and can't be destroyed by attacks, although there may be a way to overwrite one in a pinch."
+BARRIER_DESC = "Can be placed on any empty square for free. Blocks movement and can't be destroyed by attacks."
